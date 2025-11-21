@@ -1,6 +1,11 @@
 'use client';
 
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { PrivyProvider } from '@privy-io/react-auth';
+import { WagmiProvider } from '@privy-io/wagmi';
+import { wagmiConfig } from './wagmiConfig';
+
+const queryClient = new QueryClient();
 
 const privyAppId = process.env.NEXT_PUBLIC_PRIVY_APP_ID;
 
@@ -11,21 +16,30 @@ if (!privyAppId || privyAppId === 'your-privy-app-id') {
   );
 }
 
+// TypeScript assertion: privyAppId is guaranteed to be a string after the check above
+const validatedAppId: string = privyAppId;
+
 export default function Providers({ children }: { children: React.ReactNode }) {
-  return (
-    <PrivyProvider
-      appId={privyAppId}
-      clientId={process.env.NEXT_PUBLIC_PRIVY_CLIENT_ID}
-      config={{
-        // Create embedded wallets for users who don't have a wallet
-        embeddedWallets: {
-          ethereum: {
-            createOnLogin: 'users-without-wallets',
-          },
+  const privyClientId = process.env.NEXT_PUBLIC_PRIVY_CLIENT_ID;
+  
+  const privyProps = {
+    appId: validatedAppId,
+    ...(privyClientId ? { clientId: privyClientId } : {}),
+    config: {
+      // Create embedded wallets for users who don't have a wallet
+      embeddedWallets: {
+        ethereum: {
+          createOnLogin: 'users-without-wallets' as const,
         },
-      }}
-    >
-      {children}
+      },
+    },
+  };
+  
+  return (
+    <PrivyProvider {...privyProps}>
+      <QueryClientProvider client={queryClient}>
+        <WagmiProvider config={wagmiConfig}>{children}</WagmiProvider>
+      </QueryClientProvider>
     </PrivyProvider>
   );
 }
