@@ -5,7 +5,6 @@ A simple frontend to interact with the uRWA20 smart contract. This Next.js appli
 ## Features
 
 - **Wallet Connection**: Connect your wallet using Privy and Wagmi
-- **Network Switch**: Toggle between localhost and Oasis Sapphire testnet
 - **Contract Interface**: Browse and interact with all uRWA20 contract functions
 - **View Functions**: Read contract state with view/pure functions
 - **Write Functions**: Execute transactions with write functions
@@ -32,10 +31,7 @@ pnpm install
 Create a `.env.local` file in the root directory:
 
 ```bash
-# Localhost contract address (required)
-NEXT_PUBLIC_URWA20_CONTRACT_ADDRESS=0x...
-
-# Testnet contract address (optional, required if using testnet)
+# Testnet contract address (required)
 NEXT_PUBLIC_URWA20_TESTNET_CONTRACT_ADDRESS=0x...
 
 # Privy App ID (required)
@@ -55,19 +51,15 @@ pnpm dev
 
 ## Usage
 
-1. **Select Network**: Use the network switch in the header to toggle between Localhost and Testnet
-2. **Connect Wallet**: Click the wallet connect button to connect your Ethereum wallet (will automatically switch to the selected network)
-3. **Select Function**: Choose a view or write function from the contract interface
-4. **Enter Parameters**: Fill in the required parameters for the selected function
-5. **Authenticate** (if required): Some view functions require SIWE authentication
-6. **Execute**: Click "Read" for view functions or "Write" for transactions
+1. **Connect Wallet**: Click the wallet connect button to connect your Ethereum wallet (will automatically switch to testnet)
+2. **Select Function**: Choose a view or write function from the contract interface
+3. **Enter Parameters**: Fill in the required parameters for the selected function
+4. **Authenticate** (if required): Some view functions require SIWE authentication
+5. **Execute**: Click "Read" for view functions or "Write" for transactions
 
 ### Network Configuration
 
-- **Localhost**: Uses `http://localhost:8545` (Chain ID: 23293)
 - **Testnet**: Uses `https://testnet.sapphire.oasis.io` (Chain ID: 23295)
-
-The network selection is persisted in localStorage, so your preference will be remembered across sessions.
 
 ## Tech Stack
 

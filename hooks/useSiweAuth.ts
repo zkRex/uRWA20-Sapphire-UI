@@ -83,13 +83,11 @@ export function useSiweAuth() {
   // Handle contract address errors
   useEffect(() => {
     if (!contractAddress) {
-      const envVar = network === 'testnet' 
-        ? 'NEXT_PUBLIC_URWA20_TESTNET_CONTRACT_ADDRESS'
-        : 'NEXT_PUBLIC_URWA20_CONTRACT_ADDRESS';
+      const envVar = 'NEXT_PUBLIC_URWA20_TESTNET_CONTRACT_ADDRESS';
       console.error(`Contract address not available. Please set ${envVar} in your .env.local file`);
       setState(prev => ({
         ...prev,
-        error: new Error(`Contract address not configured for ${network}. Please set ${envVar} in your .env.local file`),
+        error: new Error(`Contract address not configured for testnet. Please set ${envVar} in your .env.local file`),
       }));
     }
   }, [contractAddress, network]);
@@ -121,10 +119,8 @@ export function useSiweAuth() {
     }
 
     if (!contractAddress) {
-      const envVar = network === 'testnet' 
-        ? 'NEXT_PUBLIC_URWA20_TESTNET_CONTRACT_ADDRESS'
-        : 'NEXT_PUBLIC_URWA20_CONTRACT_ADDRESS';
-      throw new Error(`Contract address not configured for ${network}. Please set ${envVar} in your .env.local file`);
+      const envVar = 'NEXT_PUBLIC_URWA20_TESTNET_CONTRACT_ADDRESS';
+      throw new Error(`Contract address not configured for testnet. Please set ${envVar} in your .env.local file`);
     }
 
     console.log('SIWE Auth: Starting authentication...');
