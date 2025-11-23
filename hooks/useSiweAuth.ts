@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useAccount, useReadContract, useSignMessage } from 'wagmi';
 import { SiweMessage } from 'siwe';
 import { parseSignature } from 'viem';
-import { URWA20_CONTRACT_ADDRESS } from '@/constants/address';
+import { getContractAddress } from '@/constants/address';
 import uRWA20Abi from '@/constants/uRWA20-abi.json';
+import { useNetwork } from '@/contexts/NetworkContext';
 
 interface SiweAuthState {
   authToken: string | null;
@@ -20,6 +21,8 @@ interface SiweAuthState {
 export function useSiweAuth() {
   const { address, chainId } = useAccount();
   const { signMessageAsync } = useSignMessage();
+  const { network } = useNetwork();
+  const contractAddress = useMemo(() => getContractAddress(network), [network]);
   const [state, setState] = useState<SiweAuthState>({
     authToken: null,
     isLoading: false,
@@ -28,7 +31,7 @@ export function useSiweAuth() {
 
   // Read the domain from the contract
   const { data: domain, refetch: refetchDomain } = useReadContract({
-    address: URWA20_CONTRACT_ADDRESS,
+    address: contractAddress,
     abi: uRWA20Abi,
     functionName: 'domain',
   });
@@ -38,7 +41,7 @@ export function useSiweAuth() {
 
   // Call login function to get auth token
   const { data: authTokenData, refetch: refetchLogin } = useReadContract({
-    address: URWA20_CONTRACT_ADDRESS,
+    address: contractAddress,
     abi: uRWA20Abi,
     functionName: 'login',
     args: siweMessage && signature ? [siweMessage, signature] : undefined,
