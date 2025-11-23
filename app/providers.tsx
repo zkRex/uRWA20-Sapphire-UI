@@ -3,7 +3,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { PrivyProvider } from '@privy-io/react-auth';
 import { WagmiProvider } from '@privy-io/wagmi';
-import { wagmiConfig } from './wagmiConfig';
+import { wagmiConfig, oasisSapphireLocalnet } from './wagmiConfig';
 
 const queryClient = new QueryClient();
 
@@ -25,6 +25,8 @@ export default function Providers({ children }: { children: React.ReactNode }) {
   const privyProps = {
     appId: validatedAppId,
     ...(privyClientId ? { clientId: privyClientId } : {}),
+    // Configure Privy to support the Oasis Sapphire Localnet chain
+    supportedChains: [oasisSapphireLocalnet],
     config: {
       // Create embedded wallets for users who don't have a wallet
       embeddedWallets: {
