@@ -14,6 +14,8 @@ import {
   formatOutputValue,
   getFunctionSignature,
   getGasConfig,
+  shouldUseEncryptedExecution,
+  createEncryptedCalldata,
 } from '@/lib/contract-utils';
 import { useSiweAuth } from '@/hooks/useSiweAuth';
 import { formatAddress } from '@/lib/utils';
@@ -89,34 +91,84 @@ export function ContractInterface() {
       const gasConfig = await getGasConfig(publicClient);
       console.log('Gas configuration:', gasConfig);
 
-      // Estimate gas limit with buffer
-      let gasLimit: bigint | undefined;
-      try {
-        const estimatedGas = await publicClient.estimateContractGas({
+      // Check if we should use encrypted execution
+      const useEncrypted = shouldUseEncryptedExecution(selectedFunction);
+      
+      let txParams: any;
+
+      if (useEncrypted) {
+        // Use encrypted execution path
+        console.log('Using encrypted execution for:', selectedFunction.name);
+        
+        // Create encrypted calldata
+        const encryptedData = await createEncryptedCalldata(
+          publicClient,
+          contractAddress,
+          selectedFunction,
+          args
+        );
+        
+        console.log('Encrypted calldata created:', encryptedData);
+
+        // Estimate gas for executeEncrypted
+        let gasLimit: bigint | undefined;
+        try {
+          const estimatedGas = await publicClient.estimateContractGas({
+            address: contractAddress,
+            abi: uRWA20Abi,
+            functionName: 'executeEncrypted',
+            args: [encryptedData],
+            value: selectedFunction.stateMutability === 'payable' ? BigInt(formValues.value || '0') : undefined,
+            account: address,
+            ...gasConfig
+          });
+          gasLimit = (estimatedGas * BigInt(120)) / BigInt(100); // 20% buffer
+          console.log('Estimated gas limit:', gasLimit);
+        } catch (e) {
+          console.warn('Gas estimation failed, falling back to default:', e);
+        }
+
+        txParams = {
+          address: contractAddress,
+          abi: uRWA20Abi,
+          functionName: 'executeEncrypted',
+          args: [encryptedData],
+          value: selectedFunction.stateMutability === 'payable' ? BigInt(formValues.value || '0') : undefined,
+          ...gasConfig,
+          ...(gasLimit ? { gas: gasLimit } : {}),
+        };
+      } else {
+        // Direct function call (for special cases like executeEncrypted itself)
+        console.log('Using direct function call for:', selectedFunction.name);
+        
+        // Estimate gas limit with buffer
+        let gasLimit: bigint | undefined;
+        try {
+          const estimatedGas = await publicClient.estimateContractGas({
+            address: contractAddress,
+            abi: uRWA20Abi,
+            functionName: selectedFunction.name as any,
+            args: args.length > 0 ? args : undefined,
+            value: selectedFunction.stateMutability === 'payable' ? BigInt(formValues.value || '0') : undefined,
+            account: address,
+            ...gasConfig
+          });
+          gasLimit = (estimatedGas * BigInt(120)) / BigInt(100); // 20% buffer
+          console.log('Estimated gas limit:', gasLimit);
+        } catch (e) {
+          console.warn('Gas estimation failed, falling back to default:', e);
+        }
+
+        txParams = {
           address: contractAddress,
           abi: uRWA20Abi,
           functionName: selectedFunction.name as any,
           args: args.length > 0 ? args : undefined,
           value: selectedFunction.stateMutability === 'payable' ? BigInt(formValues.value || '0') : undefined,
-          account: address,
-          ...gasConfig
-        });
-        gasLimit = (estimatedGas * BigInt(120)) / BigInt(100); // 20% buffer
-        console.log('Estimated gas limit:', gasLimit);
-      } catch (e) {
-        console.warn('Gas estimation failed, falling back to default:', e);
-        // Don't set gasLimit if estimation fails, let wallet handle it or fail
+          ...gasConfig,
+          ...(gasLimit ? { gas: gasLimit } : {}),
+        };
       }
-
-      const txParams = {
-        address: contractAddress,
-        abi: uRWA20Abi,
-        functionName: selectedFunction.name as any,
-        args: args.length > 0 ? args : undefined,
-        value: selectedFunction.stateMutability === 'payable' ? BigInt(formValues.value || '0') : undefined,
-        ...gasConfig,
-        ...(gasLimit ? { gas: gasLimit } : {}),
-      };
       
       console.log('Transaction params:', txParams);
 

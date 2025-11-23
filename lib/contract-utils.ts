@@ -1,4 +1,4 @@
-import { Abi, AbiFunction, AbiParameter, PublicClient } from 'viem';
+import { Abi, AbiFunction, AbiParameter, PublicClient, encodeFunctionData, encodeAbiParameters, getFunctionSelector, Address, Hex } from 'viem';
 
 /**
  * Type guard to check if an ABI item is a function
@@ -198,5 +198,80 @@ export async function getGasConfig(publicClient: PublicClient) {
       };
     }
   }
+}
+
+/**
+ * Get function selector from function name and ABI
+ */
+export function getFunctionSelectorFromAbi(fn: AbiFunction): `0x${string}` {
+  // Build function signature: functionName(param1,param2,...)
+  const params = fn.inputs.map((input) => input.type).join(',');
+  const signature = `${fn.name}(${params})`;
+  
+  // Use viem's getFunctionSelector which computes keccak256 and takes first 4 bytes
+  return getFunctionSelector(signature);
+}
+
+/**
+ * Encode function parameters for a given function (without selector)
+ */
+export function encodeFunctionParams(fn: AbiFunction, args: any[]): Hex {
+  // Encode just the parameters, not the function selector
+  return encodeAbiParameters(
+    fn.inputs as any,
+    args
+  ) as Hex;
+}
+
+/**
+ * Create encrypted transaction calldata
+ * This calls makeEncryptedTransaction on the contract to get encrypted calldata
+ */
+export async function createEncryptedCalldata(
+  publicClient: PublicClient,
+  contractAddress: Address,
+  fn: AbiFunction,
+  args: any[]
+): Promise<Hex> {
+  // Get function selector
+  const selector = getFunctionSelectorFromAbi(fn);
+  
+  // Encode parameters (without selector)
+  const params = encodeFunctionParams(fn, args);
+  
+  // Call makeEncryptedTransaction on the contract
+  const encryptedData = await publicClient.readContract({
+    address: contractAddress,
+    abi: [
+      {
+        inputs: [
+          { internalType: 'bytes4', name: 'selector', type: 'bytes4' },
+          { internalType: 'bytes', name: 'params', type: 'bytes' },
+        ],
+        name: 'makeEncryptedTransaction',
+        outputs: [{ internalType: 'bytes', name: '', type: 'bytes' }],
+        stateMutability: 'view',
+        type: 'function',
+      },
+    ],
+    functionName: 'makeEncryptedTransaction',
+    args: [selector, params],
+  });
+  
+  return encryptedData as Hex;
+}
+
+/**
+ * Check if a function should use encrypted execution
+ * Most write functions should use executeEncrypted, except for special cases
+ */
+export function shouldUseEncryptedExecution(fn: AbiFunction): boolean {
+  // Skip executeEncrypted itself and makeEncryptedTransaction
+  if (fn.name === 'executeEncrypted' || fn.name === 'makeEncryptedTransaction') {
+    return false;
+  }
+  
+  // Use encrypted execution for all write functions
+  return fn.stateMutability === 'nonpayable' || fn.stateMutability === 'payable';
 }
 
