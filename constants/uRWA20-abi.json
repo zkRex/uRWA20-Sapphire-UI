@@ -219,6 +219,19 @@
         "type": "bytes"
       }
     ],
+    "name": "EncryptedApproval",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "bytes",
+        "name": "encryptedData",
+        "type": "bytes"
+      }
+    ],
     "name": "EncryptedForcedTransfer",
     "type": "event"
   },
@@ -568,7 +581,7 @@
     "outputs": [
       {
         "internalType": "uint256",
-        "name": "result",
+        "name": "",
         "type": "uint256"
       }
     ],
@@ -632,7 +645,7 @@
     "inputs": [
       {
         "internalType": "address",
-        "name": "owner",
+        "name": "account",
         "type": "address"
       }
     ],
@@ -640,7 +653,7 @@
     "outputs": [
       {
         "internalType": "uint256",
-        "name": "result",
+        "name": "",
         "type": "uint256"
       }
     ],
@@ -1105,7 +1118,7 @@
     "outputs": [
       {
         "internalType": "uint256",
-        "name": "result",
+        "name": "",
         "type": "uint256"
       }
     ],
@@ -1285,7 +1298,7 @@
     "outputs": [
       {
         "internalType": "uint256",
-        "name": "result",
+        "name": "",
         "type": "uint256"
       }
     ],
@@ -1365,7 +1378,13 @@
     "type": "function"
   },
   {
-    "inputs": [],
+    "inputs": [
+      {
+        "internalType": "bytes",
+        "name": "token",
+        "type": "bytes"
+      }
+    ],
     "name": "viewLastDecryptedData",
     "outputs": [
       {
