@@ -44,10 +44,16 @@ export function EncryptedEvents() {
       // Get current block number
       const currentBlock = await publicClient.getBlockNumber();
 
-      // Default to last 1000 blocks if not specified
-      const startBlock = fromBlock
+      // Default to last 100 blocks if not specified (Sapphire limit)
+      let startBlock = fromBlock
         ? BigInt(fromBlock)
-        : currentBlock - BigInt(1000);
+        : currentBlock - BigInt(100);
+
+      // Ensure we don't exceed 100 blocks (Sapphire limit)
+      const maxBlockRange = BigInt(100);
+      if (currentBlock - startBlock > maxBlockRange) {
+        startBlock = currentBlock - maxBlockRange;
+      }
 
       // Fetch all encrypted event logs
       const logs = await publicClient.getLogs({

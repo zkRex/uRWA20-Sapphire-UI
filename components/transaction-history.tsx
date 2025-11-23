@@ -57,7 +57,13 @@ export function TransactionHistory() {
 
     try {
       const currentBlock = await publicClient.getBlockNumber();
-      const startBlock = fromBlock ? BigInt(fromBlock) : currentBlock - BigInt(1000);
+      let startBlock = fromBlock ? BigInt(fromBlock) : currentBlock - BigInt(100);
+
+      // Ensure we don't exceed 100 blocks (Sapphire limit)
+      const maxBlockRange = BigInt(100);
+      if (currentBlock - startBlock > maxBlockRange) {
+        startBlock = currentBlock - maxBlockRange;
+      }
 
       // Fetch all relevant events
       const logs = await publicClient.getLogs({
