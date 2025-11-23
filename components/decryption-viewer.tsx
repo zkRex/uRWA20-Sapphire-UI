@@ -7,7 +7,8 @@ import {
   useWaitForTransactionReceipt,
   usePublicClient,
 } from 'wagmi';
-import { Hex, readContract } from 'viem';
+import { Hex } from 'viem';
+import { readContract } from 'viem/actions';
 import { Button } from '@/components/ui/button';
 import { getContractAddress } from '@/constants/address';
 import uRWA20Abi from '@/constants/uRWA20-abi.json';
