@@ -1,4 +1,4 @@
-import { Abi, AbiFunction, AbiParameter } from 'viem';
+import { Abi, AbiFunction, AbiParameter, PublicClient } from 'viem';
 
 /**
  * Type guard to check if an ABI item is a function
@@ -141,5 +141,62 @@ export function getFunctionSignature(fn: AbiFunction): string {
     .map((input) => `${input.type} ${input.name || ''}`.trim())
     .join(', ');
   return `${fn.name}(${params})`;
+}
+
+/**
+ * Get gas configuration for Sapphire testnet
+ * Sapphire testnet requires a minimum gas price, so we ensure it's set properly
+ * We prioritize EIP-1559 fields (maxFeePerGas, maxPriorityFeePerGas) as viem defaults to Type 2 transactions
+ */
+export async function getGasConfig(publicClient: PublicClient) {
+  // Sapphire testnet minimum: 100 nROSE (100 Gwei)
+  const minGasPrice = BigInt(100_000_000_000); // 100 nROSE = 100 Gwei
+  
+  try {
+    // Try to get EIP-1559 fees first
+    const fees = await publicClient.estimateFeesPerGas();
+    console.log('Estimated fees:', fees);
+    
+    let maxFeePerGas = fees.maxFeePerGas || BigInt(0);
+    let maxPriorityFeePerGas = fees.maxPriorityFeePerGas || BigInt(0);
+    
+    // If fees are missing or too low, boost them
+    if (maxFeePerGas < minGasPrice) maxFeePerGas = minGasPrice;
+    if (maxPriorityFeePerGas < minGasPrice) maxPriorityFeePerGas = minGasPrice;
+    
+    // Ensure maxFee is at least maxPriorityFee
+    if (maxFeePerGas < maxPriorityFeePerGas) maxFeePerGas = maxPriorityFeePerGas;
+    
+    console.log('Using EIP-1559 fees:', { maxFeePerGas, maxPriorityFeePerGas });
+    return {
+      maxFeePerGas,
+      maxPriorityFeePerGas,
+    };
+  } catch (error) {
+    console.warn('Failed to estimate EIP-1559 fees:', error);
+    
+    // Fallback to getGasPrice but return as EIP-1559 fields to ensure Type 2 compatibility
+    try {
+      let gasPrice = await publicClient.getGasPrice();
+      console.log('Network gas price:', gasPrice);
+      
+      if (gasPrice < minGasPrice) gasPrice = minGasPrice;
+      
+      // Add 20% buffer
+      const boostedPrice = (gasPrice * BigInt(120)) / BigInt(100);
+      
+      console.log('Using converted legacy gas price:', boostedPrice);
+      return {
+        maxFeePerGas: boostedPrice,
+        maxPriorityFeePerGas: boostedPrice,
+      };
+    } catch (e) {
+      console.warn('Failed to get gas price, using default minimum:', e);
+      return {
+        maxFeePerGas: minGasPrice,
+        maxPriorityFeePerGas: minGasPrice,
+      };
+    }
+  }
 }
 

@@ -1,5 +1,6 @@
 import { defineChain } from 'viem';
-import { http, webSocket } from 'wagmi';
+import { http } from 'wagmi';
+import { sapphireTestnet } from 'wagmi/chains';
 
 import { createConfig } from '@privy-io/wagmi';
 
@@ -28,30 +29,8 @@ export const oasisSapphireLocalnet = defineChain({
   },
 });
 
-// Oasis Sapphire Testnet configuration
-// Chain ID: 0x5aff (23295 in decimal)
-export const oasisSapphireTestnet = defineChain({
-  id: 23295, // 0x5aff
-  name: 'Oasis Sapphire Testnet',
-  network: 'oasis-sapphire-testnet',
-  nativeCurrency: {
-    decimals: 18,
-    name: 'ROSE',
-    symbol: 'ROSE',
-  },
-  rpcUrls: {
-    default: {
-      http: ['https://testnet.sapphire.oasis.io'],
-      webSocket: ['wss://testnet.sapphire.oasis.io/ws'],
-    },
-  },
-  blockExplorers: {
-    default: {
-      name: 'Oasis Explorer',
-      url: 'https://explorer.oasis.io/testnet/sapphire',
-    },
-  },
-});
+// Use wagmi's built-in Sapphire Testnet chain for proper gas handling
+export const oasisSapphireTestnet = sapphireTestnet;
 
 export const wagmiConfig = createConfig({
   chains: [oasisSapphireLocalnet, oasisSapphireTestnet],

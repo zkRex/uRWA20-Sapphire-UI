@@ -13,11 +13,14 @@ import { getContractAddress } from '@/constants/address';
 import uRWA20Abi from '@/constants/uRWA20-abi.json';
 import { useNetwork } from '@/contexts/NetworkContext';
 import { formatAddressShort } from '@/lib/encryption-utils';
+import { getGasConfig } from '@/lib/contract-utils';
+import { usePublicClient } from 'wagmi';
 
 export function AuditorPermissions() {
   const { address, isConnected } = useAccount();
   const { network } = useNetwork();
   const contractAddress = getContractAddress(network);
+  const publicClient = usePublicClient();
 
   const [auditorAddress, setAuditorAddress] = useState('');
   const [duration, setDuration] = useState('3600'); // 1 hour default
@@ -58,7 +61,7 @@ export function AuditorPermissions() {
   });
 
   const handleGrantPermission = async () => {
-    if (!auditorAddress || !isConnected) return;
+    if (!auditorAddress || !isConnected || !publicClient) return;
 
     setError(null);
 
@@ -82,6 +85,9 @@ export function AuditorPermissions() {
         }
       }
 
+      // Get gas configuration for Sapphire testnet
+      const gasConfig = await getGasConfig(publicClient);
+
       await writeContract({
         address: contractAddress,
         abi: uRWA20Abi,
@@ -92,6 +98,7 @@ export function AuditorPermissions() {
           fullAccess,
           addresses,
         ],
+        ...gasConfig,
       });
     } catch (err: any) {
       setError(err?.message || 'Failed to grant permission');
@@ -100,7 +107,7 @@ export function AuditorPermissions() {
   };
 
   const handleRevokePermission = async () => {
-    if (!auditorAddress || !isConnected) return;
+    if (!auditorAddress || !isConnected || !publicClient) return;
 
     setError(null);
 
@@ -110,11 +117,15 @@ export function AuditorPermissions() {
         return;
       }
 
+      // Get gas configuration for Sapphire testnet
+      const gasConfig = await getGasConfig(publicClient);
+
       await writeContract({
         address: contractAddress,
         abi: uRWA20Abi,
         functionName: 'revokeAuditorPermission',
         args: [auditorAddress as Address],
+        ...gasConfig,
       });
     } catch (err: any) {
       setError(err?.message || 'Failed to revoke permission');

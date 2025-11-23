@@ -13,6 +13,7 @@ import {
   parseFunctionInputs,
   formatOutputValue,
   getFunctionSignature,
+  getGasConfig,
 } from '@/lib/contract-utils';
 import { useSiweAuth } from '@/hooks/useSiweAuth';
 import { formatAddress } from '@/lib/utils';
@@ -79,19 +80,49 @@ export function ContractInterface() {
   };
 
   const handleWrite = async () => {
-    if (!selectedFunction) return;
+    if (!selectedFunction || !publicClient) return;
 
     try {
       const args = parseFunctionInputs(selectedFunction, formValues);
+      
+      // Get gas configuration for Sapphire testnet
+      const gasConfig = await getGasConfig(publicClient);
+      console.log('Gas configuration:', gasConfig);
 
-      await writeContract({
+      // Estimate gas limit with buffer
+      let gasLimit: bigint | undefined;
+      try {
+        const estimatedGas = await publicClient.estimateContractGas({
+          address: contractAddress,
+          abi: uRWA20Abi,
+          functionName: selectedFunction.name as any,
+          args: args.length > 0 ? args : undefined,
+          value: selectedFunction.stateMutability === 'payable' ? BigInt(formValues.value || '0') : undefined,
+          account: address,
+          ...gasConfig
+        });
+        gasLimit = (estimatedGas * BigInt(120)) / BigInt(100); // 20% buffer
+        console.log('Estimated gas limit:', gasLimit);
+      } catch (e) {
+        console.warn('Gas estimation failed, falling back to default:', e);
+        // Don't set gasLimit if estimation fails, let wallet handle it or fail
+      }
+
+      const txParams = {
         address: contractAddress,
         abi: uRWA20Abi,
         functionName: selectedFunction.name as any,
         args: args.length > 0 ? args : undefined,
         value: selectedFunction.stateMutability === 'payable' ? BigInt(formValues.value || '0') : undefined,
-      });
+        ...gasConfig,
+        ...(gasLimit ? { gas: gasLimit } : {}),
+      };
+      
+      console.log('Transaction params:', txParams);
+
+      await writeContract(txParams);
     } catch (error: any) {
+      console.error('Write contract error:', error);
       setReadError(error?.message || 'Failed to write contract');
     }
   };

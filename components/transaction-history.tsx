@@ -16,6 +16,7 @@ import {
   formatDecryptedData,
   DecryptedData,
 } from '@/lib/encryption-utils';
+import { getGasConfig } from '@/lib/contract-utils';
 
 interface Transaction {
   blockNumber: bigint;
@@ -130,12 +131,16 @@ export function TransactionHistory() {
     );
 
     try {
+      // Get gas configuration for Sapphire testnet
+      const gasConfig = await getGasConfig(publicClient);
+
       // Call processDecryption
       await writeContract({
         address: contractAddress,
         abi: uRWA20Abi,
         functionName: 'processDecryption',
         args: [tx.encryptedData],
+        ...gasConfig,
       });
 
       // Wait a bit for transaction to confirm, then fetch decrypted data

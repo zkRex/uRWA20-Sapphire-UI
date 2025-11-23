@@ -9,6 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@oasisprotocol/sapphire-paratime": "^2.2.0",
     "@privy-io/react-auth": "^3.7.0",
     "@privy-io/wagmi": "^2.0.2",
     "@radix-ui/react-slot": "^1.2.4",

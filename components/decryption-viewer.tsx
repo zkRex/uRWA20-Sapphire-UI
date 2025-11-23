@@ -19,6 +19,7 @@ import {
   formatTokenAmount,
   DecryptedData,
 } from '@/lib/encryption-utils';
+import { getGasConfig } from '@/lib/contract-utils';
 
 interface DecryptionViewerProps {
   encryptedData?: Hex;
@@ -55,7 +56,7 @@ export function DecryptionViewer({ encryptedData: initialData, onClose }: Decryp
   }, [isConfirmed, hash, publicClient, address]);
 
   const handleDecrypt = async () => {
-    if (!encryptedData || !isConnected) return;
+    if (!encryptedData || !isConnected || !publicClient) return;
 
     setError(null);
     setDecryptedData(null);
@@ -66,11 +67,15 @@ export function DecryptionViewer({ encryptedData: initialData, onClose }: Decryp
         ? (encryptedData as Hex)
         : (`0x${encryptedData}` as Hex);
 
+      // Get gas configuration for Sapphire testnet
+      const gasConfig = await getGasConfig(publicClient);
+
       await writeContract({
         address: contractAddress,
         abi: uRWA20Abi,
         functionName: 'processDecryption',
         args: [data],
+        ...gasConfig,
       });
     } catch (err: any) {
       setError(err?.message || 'Failed to process decryption');
@@ -103,16 +108,20 @@ export function DecryptionViewer({ encryptedData: initialData, onClose }: Decryp
   };
 
   const handleClear = async () => {
-    if (!isConnected) return;
+    if (!isConnected || !publicClient) return;
 
     setError(null);
 
     try {
+      // Get gas configuration for Sapphire testnet
+      const gasConfig = await getGasConfig(publicClient);
+
       await writeContract({
         address: contractAddress,
         abi: uRWA20Abi,
         functionName: 'clearLastDecryptedData',
         args: [],
+        ...gasConfig,
       });
 
       // Reset local state
