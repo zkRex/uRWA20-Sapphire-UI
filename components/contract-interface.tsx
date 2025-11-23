@@ -4,7 +4,7 @@ import { useState, useMemo } from 'react';
 import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt, usePublicClient } from 'wagmi';
 import { AbiFunction } from 'viem';
 import { Button } from '@/components/ui/button';
-import { URWA20_CONTRACT_ADDRESS } from '@/constants/address';
+import { getContractAddress } from '@/constants/address';
 import uRWA20Abi from '@/constants/uRWA20-abi.json';
 import {
   getFunctions,
@@ -16,9 +16,12 @@ import {
 } from '@/lib/contract-utils';
 import { useSiweAuth } from '@/hooks/useSiweAuth';
 import { formatAddress } from '@/lib/utils';
+import { useNetwork } from '@/contexts/NetworkContext';
 
 export function ContractInterface() {
   const { address, isConnected } = useAccount();
+  const { network } = useNetwork();
+  const contractAddress = useMemo(() => getContractAddress(network), [network]);
   const { writeContract, data: hash, isPending: isWritePending } = useWriteContract();
   const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
     hash,
@@ -61,7 +64,7 @@ export function ContractInterface() {
       const args = parseFunctionInputs(selectedFunction, formValues, authToken || undefined);
 
       const result = await publicClient.readContract({
-        address: URWA20_CONTRACT_ADDRESS,
+        address: contractAddress,
         abi: uRWA20Abi,
         functionName: selectedFunction.name as any,
         args: args.length > 0 ? args : undefined,
@@ -82,7 +85,7 @@ export function ContractInterface() {
       const args = parseFunctionInputs(selectedFunction, formValues);
 
       await writeContract({
-        address: URWA20_CONTRACT_ADDRESS,
+        address: contractAddress,
         abi: uRWA20Abi,
         functionName: selectedFunction.name as any,
         args: args.length > 0 ? args : undefined,
@@ -100,7 +103,7 @@ export function ContractInterface() {
       <div className="border-b pb-4">
         <h2 className="text-2xl font-bold mb-2">uRWA20 Contract Interface</h2>
         <div className="flex items-center gap-4 text-sm text-muted-foreground">
-          <span>Contract: {formatAddress(URWA20_CONTRACT_ADDRESS, 10)}</span>
+          <span>Contract: {formatAddress(contractAddress, 10)}</span>
           {isConnected && address && (
             <span>Wallet: {formatAddress(address, 10)}</span>
           )}
