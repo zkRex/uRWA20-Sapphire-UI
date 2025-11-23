@@ -7,32 +7,33 @@ import { Button } from '@/components/ui/button'
 import { Wallet } from 'lucide-react'
 import { formatAddress } from '@/lib/utils'
 import { formatEther } from 'viem'
-import { oasisSapphireLocalnet } from '@/app/wagmiConfig'
+import { useNetwork } from '@/contexts/NetworkContext'
 
 export function WalletConnectButton() {
   const { ready, authenticated, login, logout } = usePrivy()
   const { wallets } = useWallets()
   const { address, chainId } = useAccount()
   const { switchChain } = useSwitchChain()
+  const { currentChain } = useNetwork()
   const { data: balance } = useBalance({
     address: address,
   })
 
   const wallet = wallets[0]
 
-  // Automatically switch to local chain when connected
+  // Automatically switch to selected network chain when connected
   useEffect(() => {
-    if (ready && authenticated && address && chainId && chainId !== oasisSapphireLocalnet.id) {
-      const switchToLocalChain = async () => {
+    if (ready && authenticated && address && chainId && chainId !== currentChain.id) {
+      const switchToCurrentChain = async () => {
         try {
           // Use Privy's wallet chain switching if available, otherwise use wagmi
           if (wallet?.setChain) {
-            const result = wallet.setChain(oasisSapphireLocalnet.id)
+            const result = wallet.setChain(currentChain.id)
             if (result && typeof result.catch === 'function') {
               await result
             }
           } else if (switchChain) {
-            const result = switchChain({ chainId: oasisSapphireLocalnet.id })
+            const result = switchChain({ chainId: currentChain.id })
             if (result && typeof result.catch === 'function') {
               await result
             }
@@ -41,9 +42,9 @@ export function WalletConnectButton() {
           console.error('Failed to switch chain:', error)
         }
       }
-      switchToLocalChain()
+      switchToCurrentChain()
     }
-  }, [ready, authenticated, address, chainId, wallet, switchChain])
+  }, [ready, authenticated, address, chainId, currentChain.id, wallet, switchChain])
 
   if (!ready) {
     return (
