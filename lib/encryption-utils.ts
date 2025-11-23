@@ -75,7 +75,7 @@ export function getEventName(log: Log): string | null {
       data: log.data,
       topics: log.topics,
     });
-    return decoded.eventName;
+    return decoded.eventName as string;
   } catch {
     return null;
   }
@@ -97,7 +97,7 @@ export function formatTokenAmount(amount: bigint, decimals = 18): string {
   const whole = amount / divisor;
   const remainder = amount % divisor;
 
-  if (remainder === 0n) {
+  if (remainder === BigInt(0)) {
     return whole.toString();
   }
 
