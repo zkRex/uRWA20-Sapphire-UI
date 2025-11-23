@@ -7,7 +7,7 @@ const nextConfig: NextConfig = {
   images: {
     unoptimized: true,
   },
-  webpack: (config, { isServer, webpack }) => {
+  webpack: (config, { isServer }) => {
     // Exclude Node.js built-in modules from client bundles
     if (!isServer) {
       config.resolve.fallback = {
@@ -27,14 +27,6 @@ const nextConfig: NextConfig = {
         buffer: false,
       };
     }
-
-    // Ignore test files and test dependencies in node_modules
-    config.plugins.push(
-      new webpack.IgnorePlugin({
-        resourceRegExp: /\/test\//,
-        contextRegExp: /node_modules/,
-      })
-    );
 
     return config;
   },
