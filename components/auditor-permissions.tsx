@@ -278,13 +278,13 @@ export function AuditorPermissions() {
               <div className="grid gap-1">
                 <div>
                   <span className="text-muted-foreground">Expiry:</span>{' '}
-                  {auditorPermissionDetails[0] > 0
-                    ? new Date(Number(auditorPermissionDetails[0]) * 1000).toLocaleString()
+                  {(auditorPermissionDetails as any[])[0] > 0
+                    ? new Date(Number((auditorPermissionDetails as any[])[0]) * 1000).toLocaleString()
                     : 'Not set'}
                 </div>
                 <div>
                   <span className="text-muted-foreground">Full Access:</span>{' '}
-                  {auditorPermissionDetails[1] ? 'Yes' : 'No'}
+                  {(auditorPermissionDetails as any[])[1] ? 'Yes' : 'No'}
                 </div>
               </div>
             </div>
