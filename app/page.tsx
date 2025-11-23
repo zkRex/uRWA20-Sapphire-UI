@@ -1,6 +1,10 @@
 import { WalletConnectButton } from '@/components/wallet-connect-button'
 import { ContractInterface } from '@/components/contract-interface'
 import { NetworkSwitch } from '@/components/network-switch'
+import { DecryptionViewer } from '@/components/decryption-viewer'
+import { EncryptedEvents } from '@/components/encrypted-events'
+import { AuditorPermissions } from '@/components/auditor-permissions'
+import { TransactionHistory } from '@/components/transaction-history'
 
 export default function Home() {
   return (
@@ -13,6 +17,10 @@ export default function Home() {
           </div>
           <WalletConnectButton />
         </div>
+        <TransactionHistory />
+        <EncryptedEvents />
+        <DecryptionViewer />
+        <AuditorPermissions />
         <ContractInterface />
       </div>
     </div>
