@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { usePublicClient, useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
-import { Hex, readContract } from 'viem';
+import { Hex } from 'viem';
+import { readContract } from 'viem/actions';
 import { Button } from '@/components/ui/button';
 import { getContractAddress } from '@/constants/address';
 import uRWA20Abi from '@/constants/uRWA20-abi.json';
@@ -56,7 +57,7 @@ export function TransactionHistory() {
 
     try {
       const currentBlock = await publicClient.getBlockNumber();
-      const startBlock = fromBlock ? BigInt(fromBlock) : currentBlock - 1000n;
+      const startBlock = fromBlock ? BigInt(fromBlock) : currentBlock - BigInt(1000);
 
       // Fetch all relevant events
       const logs = await publicClient.getLogs({
