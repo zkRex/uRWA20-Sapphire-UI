@@ -75,7 +75,7 @@ export function getEventName(log: Log): string | null {
       data: log.data,
       topics: log.topics,
     });
-    return decoded.eventName as string;
+    return decoded.eventName ? String(decoded.eventName) : null;
   } catch {
     return null;
   }
