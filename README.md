@@ -1,36 +1,60 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# uRWA20 Sapphire UI
+
+A simple frontend to interact with the uRWA20 smart contract. This Next.js application provides a user-friendly interface for calling contract functions, viewing contract state, and executing transactions.
+
+## Features
+
+- **Wallet Connection**: Connect your wallet using Privy and Wagmi
+- **Contract Interface**: Browse and interact with all uRWA20 contract functions
+- **View Functions**: Read contract state with view/pure functions
+- **Write Functions**: Execute transactions with write functions
+- **SIWE Authentication**: Sign-In With Ethereum authentication for protected functions
+- **Transaction Tracking**: Monitor transaction status and confirmations
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 18+ 
+- pnpm (recommended) or npm/yarn
+
+### Installation
+
+1. Install dependencies:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Set up environment variables:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Create a `.env.local` file in the root directory:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+NEXT_PUBLIC_URWA20_CONTRACT_ADDRESS=0x...
+```
 
-## Learn More
+3. Run the development server:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+pnpm dev
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+4. Open [http://localhost:3000](http://localhost:3000) in your browser
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Usage
 
-## Deploy on Vercel
+1. **Connect Wallet**: Click the wallet connect button to connect your Ethereum wallet
+2. **Select Function**: Choose a view or write function from the contract interface
+3. **Enter Parameters**: Fill in the required parameters for the selected function
+4. **Authenticate** (if required): Some view functions require SIWE authentication
+5. **Execute**: Click "Read" for view functions or "Write" for transactions
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Tech Stack
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **Next.js 16** - React framework
+- **Wagmi** - Ethereum React hooks
+- **Privy** - Wallet connection and authentication
+- **Viem** - Ethereum library
+- **Tailwind CSS** - Styling
+- **Radix UI** - UI components
