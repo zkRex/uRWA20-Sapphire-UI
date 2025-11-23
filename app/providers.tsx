@@ -26,9 +26,10 @@ export default function Providers({ children }: { children: React.ReactNode }) {
     appId: validatedAppId,
     ...(privyClientId ? { clientId: privyClientId } : {}),
     // Configure Privy to support ONLY the Oasis Sapphire Localnet chain
-    supportedChains: [oasisSapphireLocalnet],
-    defaultChain: oasisSapphireLocalnet,
     config: {
+      // Configure supported chains - must be inside config object
+      supportedChains: [oasisSapphireLocalnet],
+      defaultChain: oasisSapphireLocalnet,
       // Create embedded wallets for users who don't have a wallet
       embeddedWallets: {
         ethereum: {
