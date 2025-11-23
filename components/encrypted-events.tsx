@@ -47,7 +47,7 @@ export function EncryptedEvents() {
       // Default to last 1000 blocks if not specified
       const startBlock = fromBlock
         ? BigInt(fromBlock)
-        : currentBlock - 1000n;
+        : currentBlock - BigInt(1000);
 
       // Fetch all encrypted event logs
       const logs = await publicClient.getLogs({
