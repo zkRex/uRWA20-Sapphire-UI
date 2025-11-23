@@ -263,7 +263,8 @@ export async function createEncryptedCalldata(
 
 /**
  * Check if a function should use encrypted execution
- * Most write functions should use executeEncrypted, except for special cases
+ * Only functions that route through executeEncrypted should use this path
+ * Based on the contract implementation, these are the functions that were moved to internal _execute* functions
  */
 export function shouldUseEncryptedExecution(fn: AbiFunction): boolean {
   // Skip executeEncrypted itself and makeEncryptedTransaction
@@ -271,7 +272,18 @@ export function shouldUseEncryptedExecution(fn: AbiFunction): boolean {
     return false;
   }
   
-  // Use encrypted execution for all write functions
-  return fn.stateMutability === 'nonpayable' || fn.stateMutability === 'payable';
+  // List of functions that route through executeEncrypted (based on contract implementation)
+  const encryptedFunctions = [
+    'transfer',
+    'transferFrom',
+    'approve',
+    'mint',
+    'changeWhitelist',
+    'setFrozenTokens',
+    'forcedTransfer',
+  ];
+  
+  // Only use encrypted execution for these specific functions
+  return encryptedFunctions.includes(fn.name);
 }
 
