@@ -272,7 +272,7 @@ export function AuditorPermissions() {
           </Button>
 
           {/* Permission Result */}
-          {checkAddress && auditorPermissionDetails && (
+          {checkAddress && auditorPermissionDetails ? (
             <div className="p-3 bg-muted rounded space-y-2 text-sm">
               <div className="font-semibold">Permission Details:</div>
               <div className="grid gap-1">
@@ -288,7 +288,7 @@ export function AuditorPermissions() {
                 </div>
               </div>
             </div>
-          )}
+          ) : null}
 
           {/* Permission Check Result */}
           {checkAddress && checkTarget && permissionData !== undefined && (
